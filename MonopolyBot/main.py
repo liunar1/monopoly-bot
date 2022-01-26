@@ -34,7 +34,7 @@ async def roll(ctx):
     Player.position += Player.position
     await ctx.send(f"{Player.name}'s position is {Player.position}")
 
-
+current_turn = 0
 if Player.position == 4:
     list_of_players[current_turn].tax(200)
 if Player.position == 39:
