@@ -17,4 +17,5 @@ class Board:
             Home("States Avenue", 140, self.bank),
             Home("Virginia Avenue", 160, self.bank),
             Railroad("Pennsylvania Avenue", 200, self.bank),
+            Home("St. James Place", 180, self.bank),
         ]
