@@ -1,5 +1,7 @@
-import board
-import player
+from player import *
+from properties import *
+from board import *
+import main
 
 
 class Space:
@@ -7,5 +9,10 @@ class Space:
         self.name = name
         self.action = action
 
-    def tax(self, tax: int):
-        player.Player.money -= tax
+    @staticmethod
+    def tax_player(self, tax: int):
+        Player.money -= tax
+
+    @staticmethod
+    def property(self):
+        if Property.owner == bank:
