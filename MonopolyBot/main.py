@@ -10,6 +10,8 @@ client = commands.Bot(command_prefix='$')
 
 list_of_players = []
 
+bank = Player('Bank', 0)
+
 
 @client.event
 async def on_ready():
@@ -33,6 +35,7 @@ async def roll(ctx):
     await ctx.reply(f"{Player.name} rolled a {Player.rolling()}!")  # could use some help here
     Player.position += Player.position
     await ctx.send(f"{Player.name}'s position is {Player.position}")
+
 
 current_turn = 0
 if Player.position == 4:

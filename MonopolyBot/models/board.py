@@ -1,9 +1,11 @@
 from properties import *
 
 
+
 class Board:
+
     def __init__(self, players):
-        self.bank = Player('Bank', 0)
+        # self.bank = Player('Bank', 0)
         self.players = [],
         self.spaces = [
             Home("Mediterranean Avenue", 60, self.bank),
