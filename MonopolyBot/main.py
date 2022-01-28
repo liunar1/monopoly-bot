@@ -37,6 +37,12 @@ async def roll(ctx):
     await ctx.send(f"{Player.name}'s position is {Player.position}")
 
 
+@client.command()
+async def buy(ctx):
+    await ctx.reply(f"{Player.name} bought the property")
+    # I want to change this in the future so that I can indicate which property has been bought
+
+
 current_turn = 0
 if Player.position == 4:
     list_of_players[current_turn].tax(200)

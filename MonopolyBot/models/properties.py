@@ -2,13 +2,15 @@ import enum
 from typing import Optional
 from player import Player
 from space import Space
+import main
 
 
 class Property(Space):
+
     def __init__(self, name: str, action, cost: int, owner: Player):
         super().__init__(name, action)
         self.cost = cost
-        self.owner = owner
+        self.owner = main.bank
 
 
 class Railroad(Property):

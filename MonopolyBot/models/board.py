@@ -1,7 +1,6 @@
 from properties import *
 
 
-
 class Board:
 
     def __init__(self, players):
