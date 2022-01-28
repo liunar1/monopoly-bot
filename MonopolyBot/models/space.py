@@ -16,3 +16,6 @@ class Space:
     @staticmethod
     def property(self):
         if Property.owner == bank:
+            await ctx.send('This property is unowned.')
+            await ctx.send('Would you like to buy this property?')
+
