@@ -22,7 +22,7 @@ async def on_ready():
 async def ping(ctx):
     await ctx.reply('Pong!')
     await ctx.send('ctx works again')
-
+#test ping pong
 
 @client.command()
 async def join(ctx):
