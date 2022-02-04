@@ -1,7 +1,6 @@
 from player import *
 from properties import *
 from board import *
-import main
 
 
 class Space:
@@ -14,7 +13,7 @@ class Space:
         Player.money -= tax
 
     @staticmethod
-    def property(self):
+    async def property(self, ctx):
         if Property.owner == bank:
             await ctx.send('This property is unowned.')
             await ctx.send('Would you like to buy this property?')

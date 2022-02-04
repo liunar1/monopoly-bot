@@ -2,7 +2,6 @@ import enum
 from typing import Optional
 from player import Player
 from space import Space
-import main
 
 
 class Property(Space):
@@ -10,7 +9,7 @@ class Property(Space):
     def __init__(self, name: str, action, cost: int, owner: Player):
         super().__init__(name, action)
         self.cost = cost
-        self.owner = main.bank
+        self.owner = owner
 
 
 class Railroad(Property):
