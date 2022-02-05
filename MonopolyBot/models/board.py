@@ -1,55 +1,53 @@
-from properties import *
-from space import *
+from models.properties import *
+from models.space import *
 
 
 class Board:
-
-    def __init__(self, players):
-        # self.bank = Player('Bank', 0)
+    def __init__(self, num_players):
+        self.num_players = num_players
         self.players = [],
         self.spaces = [
             # GO
-            Home("Mediterranean Avenue", 60, self.bank, Color.BROWN),
+            Home("Mediterranean Avenue", 60, 2, None, Color.BROWN, 0),
             # Community Chest
-            Home("Baltic Avenue", 60, self.bank, Color.BROWN),
+            Home("Baltic Avenue", 60, 4, None, Color.BROWN, 0),
             # Income Tax
-            Railroad("Reading Railroad", 200, self.bank),
-            Home("Oriental Avenue", 100, self.bank, Color.LIGHT_BLUE),
+            Railroad("Reading Railroad", 200, 25, None),
+            Home("Oriental Avenue", 100, 6, None, Color.LIGHT_BLUE, 0),
             # Chance
-            Home("Vermont", 100, self.bank, Color.LIGHT_BLUE),
-            Home("Connecticut", 120, self.bank, Color.LIGHT_BLUE),
+            Home("Vermont", 100, 6, None, Color.LIGHT_BLUE, 0),
+            Home("Connecticut", 120, 8, None, Color.LIGHT_BLUE, 0),
             # Jail
-            Home("St. Charles Place", 140, self.bank, Color.PINK),
-            Utility("Electric Company", 150, self.bank),
-            Home("States Avenue", 140, self.bank, Color.PINK),
-            Home("Virginia Avenue", 160, self.bank, Color.PINK),
-            Railroad("Pennsylvania Avenue", 200, self.bank),
-            Home("St. James Place", 180, self.bank, Color.ORANGE),
+            Home("St. Charles Place", 140, 10, None, Color.PINK, 0),
+            Utility("Electric Company", 150, None, None),
+            Home("States Avenue", 140, 10, None, Color.PINK, 0),
+            Home("Virginia Avenue", 160, 12, None, Color.PINK, 0),
+            Railroad("Pennsylvania Avenue", 200, 25, None),
+            Home("St. James Place", 180, 14, None, Color.ORANGE, 0),
             # Community Chest
-            Home("Tennessee Avenue", 180, self.bank, Color.ORANGE),
-            Home("New York Avenue", 200, self.bank, Color.ORANGE),
+            Home("Tennessee Avenue", 180, 14, None, Color.ORANGE, 0),
+            Home("New York Avenue", 200, 16, None, Color.ORANGE, 0),
             # Free Parking
-            Home("Kentucky Avenue", 220, self.bank, Color.RED),
+            Home("Kentucky Avenue", 220, 18, None, Color.RED, 0),
             # Chance
-            Home("Indiana Avenue", 220, self.bank, Color.RED),
-            Home("Illinois Avenue", 240, self.bank, Color.RED),
-            Railroad("B. & O. Railroad", 200, self.bank),
-            Home("Atlantic Avenue", 260, self.bank, Color.YELLOW),
-            Home("Ventnor Avenue", 260, self.bank, Color.YELLOW),
-            Utility("Water Works", 150, self.bank),
-            Home("Marvin Gardens", 280, self.bank, Color.YELLOW),
+            Home("Indiana Avenue", 220, 18, None, Color.RED, 0),
+            Home("Illinois Avenue", 240, 20, None, Color.RED, 0),
+            Railroad("B. & O. Railroad", 200, 25, None),
+            Home("Atlantic Avenue", 260, 22, None, Color.YELLOW, 0),
+            Home("Ventnor Avenue", 260, 22, None, Color.YELLOW, 0),
+            Utility("Water Works", 150, None, None),
+            Home("Marvin Gardens", 280, 24, None, Color.GREEN, 0),
             # Go to Jail
-            Home("Pacific Avenue", 300, self.bank, Color.GREEN),
-            Home("North Carolina Avenue", 300, self.bank, Color.GREEN),
+            Home("Pacific Avenue", 300, 26, None, Color.GREEN, 0),
+            Home("North Carolina Avenue", 300, 26, None, Color.GREEN, 0),
             # Community Chest
-            Home("Pennsylvania Avenue", 320, self.bank, GREEN),
-            Railroad("Short Line", 200, self.bank),
+            Home("Pennsylvania Avenue", 320, 28, None, Color.GREEN, 0),
+            Railroad("Short Line", 200, 25, None),
             # Chance
-            Home("Park Place", 350, self.bank, DARK_BLUE),
+            Home("Park Place", 350, 35, None, Color.DARK_BLUE, 0),
             # Luxury Tax
-            Home("Boardwalk", 400, self.bank, DARK_BLUE),
-            ]
-
-
-
+            Home("Boardwalk", 400, 50, None, Color.DARK_BLUE, 0),
         ]
+
+
+board = None
