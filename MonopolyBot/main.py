@@ -1,19 +1,10 @@
-import nextcord
-import random
-import models
-
 from nextcord.ext import commands
-
-from models.bank import Bank
+from models import board
 from models.player import Player
-from models.space import Space
 
 client = commands.Bot(command_prefix='$')
 
 list_of_players = []
-
-
-# bank = Player('Bank', 0)
 
 
 @client.event
@@ -27,18 +18,13 @@ async def ping(ctx):
     await ctx.send('ctx works again')
 
 
-# test ping pong
-
-game_number = 0
-
-
-@client.command()  # this function needs to be fixed
-async def create_game(ctx, number_of_players):  # should there be a game id here as well?
-    game_number += 1
-    Bank(game_number)
+@client.command()
+async def create_game(ctx, number_of_players):
+    if board.board is not None:
+        await ctx.reply("Game already in progress you fucking clown!")
+        return
+    board.board = board.Board(2)
     await ctx.reply(f'Game is starting with {number_of_players} players')
-    await ctx.reply(f'bank number is {bank1.id}')
-    # create a list with that many indices
 
 
 @client.command()
