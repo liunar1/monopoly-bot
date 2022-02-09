@@ -1,5 +1,6 @@
 from nextcord.ext import commands
-from models import board
+from models.board import board
+# from models.board import Board
 from models.player import Player
 
 client = commands.Bot(command_prefix='$')
@@ -25,6 +26,7 @@ async def create_game(ctx, number_of_players):
         return
     board.board = board.Board(2)
     await ctx.reply(f'Game is starting with {number_of_players} players')
+    # await ctx.reply(f'The first property on the board is {board.board.spaces[0]}')
 
 
 @client.command()
