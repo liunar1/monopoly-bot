@@ -21,10 +21,10 @@ async def ping(ctx):
 
 @client.command()
 async def create_game(ctx, number_of_players):
-    if board.board is not None:
-        await ctx.reply("Game already in progress you fucking clown!")
-        return
-    board.board = board.Board(2)
+    # if board.board is not None:
+    #     await ctx.reply("Game already in progress you fucking clown!")
+    #     return
+    # board.board = board.Board(2)
     await ctx.reply(f'Game is starting with {number_of_players} players')
     # await ctx.reply(f'The first property on the board is {board.board.spaces[0]}')
 
