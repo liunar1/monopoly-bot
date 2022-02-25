@@ -3,9 +3,9 @@ from models.space import *
 
 
 class Board:
-    def __init__(self, num_players):
+    def __init__(self, num_players: int):
         self.num_players = num_players
-        self.players = [],
+        self.players = []
         self.spaces = [
             # GO
             Home("Mediterranean Avenue", 60, 2, None, Color.BROWN, 0),
