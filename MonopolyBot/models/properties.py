@@ -5,21 +5,21 @@ from models.space import Space
 
 
 class Property(Space):
-    def __init__(self, name: str, cost: int, owner: Optional[Player]):
-        super().__init__(name)
+    def __init__(self, name: str, action, cost: int, owner: Optional[Player]):
+        super().__init__(name, action)
         self.cost = cost
         self.owner = owner
 
 
 class Railroad(Property):
-    def __init__(self, name, cost, rent, owner: Optional[Player]):
-        super().__init__(name, cost, owner)
+    def __init__(self, name, action, cost, rent, owner: Optional[Player]):
+        super().__init__(name, action, cost, owner)
         self.rent = rent
 
 
 class Utility(Property):
-    def __init__(self, name, cost, rent, owner: Optional[Player]):
-        super().__init__(name, cost, owner)
+    def __init__(self, name, action, cost, rent, owner: Optional[Player]):
+        super().__init__(name, action, cost, owner)
         self.rent = rent
 
 
@@ -35,11 +35,13 @@ class Color(enum.Enum):
 
 
 class Home(Property):
-    def __init__(self, name, cost, rent, owner: Optional[Player], color: Color, houses: int):
-        super().__init__(name, cost, owner)
+    def __init__(self, name, action, cost, rent, owner: Optional[Player], color: Color, houses: int):
+        super().__init__(name, action, cost, owner)
         self.rent = rent
         self.color = color
         self.houses = houses
+
+
 '''
 no clue where this is supposed to go or what this is supposed to be so I'm leaving it as a comment here; should this be
 a dictionary, list... ??? wtf??? there has to be a better way to do this bro
@@ -100,7 +102,3 @@ a dictionary, list... ??? wtf??? there has to be a better way to do this bro
             if Home.houses = 4:
             if Home.houses = 5:
 '''
-
-
-
-
