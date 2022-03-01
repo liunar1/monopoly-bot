@@ -3,6 +3,7 @@ from nextcord import User
 from models import board
 from models.player import Player
 from models import properties
+import action
 
 client = commands.Bot(command_prefix='$')
 
@@ -41,17 +42,22 @@ async def join(ctx):
             await ctx.reply(f"{board.board.players[len(board.board.players) - 1].name} has joined the game.")
     else:
         await ctx.reply("Sorry, but the game is full. Please go find more friends to create a new game.")
+    if len(board.board.players) == int(board.board.num_players):
+        board.board.currentPlayer = 0
+        await ctx.reply(
+            f"The game is now full. {board.board.players[board.board.currentPlayer].name} will take the first turn.")
+
     # print(f"{len(board.board.players)} is how  many people joined the game")
 
 
 @client.command()  # currently for testing purposes only
-async def delete_board(ctx):
+async def delete_game(ctx):
     board.board = None
     await ctx.reply("Game has been deleted")
     print("Game has been deleted")
 
 
-@client.command() # also probably for testing purposes only, will I need this during actual use?
+@client.command()  # also probably for testing purposes only, will I need this during actual use?
 async def check(ctx):
     in_game = False
     for i in board.board.players:
@@ -67,15 +73,58 @@ async def check(ctx):
 
 @client.command()
 async def roll(ctx):
-    await ctx.reply(f"{Player.name} rolled a {Player.rolling()}!")  # could use some help here
-    Player.position += Player.position
-    await ctx.send(f"{Player.name}'s position is {Player.position}")
+    if board.board is None:
+        await ctx.reply("What the fuck you're not even in the game stop trying to roll the dice")
+        return
+    in_game = False
+    for i in board.board.players:
+        if i.name == ctx.author:
+            in_game = True
+    if in_game is False:
+        await ctx.reply("What the fuck you're not even in the game stop trying to roll the dice")
+    else:
+        if board.board.players[board.board.currentPlayer % len(board.board.players)].name == ctx.author:
+            await ctx.reply(
+                f"You rolled a {board.board.players[board.board.currentPlayer % len(board.board.players)].rolling()}!")
+            await ctx.send(
+                f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has now landed on {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].name}")
+            if board.board.spaces[
+                board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(
+                    board.board.players[board.board.currentPlayer % len(board.board.players)]) == "unowned":
+                buyable()
+                await ctx.reply(
+                    f"This property is unowned. Would you like to buy it for ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost}?")
+            else:
+                await ctx.reply(
+                    f"This property is owned by {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name}")
+                await ctx.send(
+                    f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has paid {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name} ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].rent} for rent")
+                await ctx.reply(f"Your new balance is ${board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
+        else:
+            await ctx.reply("Bro stop trying to roll it's not even your fucking turn")
+
+
+def buyable():
+    return True
 
 
 @client.command()
 async def buy(ctx):
-    await ctx.reply(f"{Player.name} bought the property")
-    # I want to change this in the future so that I can indicate which property has been bought
+    if ctx.author == board.board.players[board.board.currentPlayer % len(board.board.players)].name and buyable:
+        board.board.spaces[
+            board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner = \
+        board.board.players[board.board.currentPlayer % len(board.board.players)]
+        board.board.players[board.board.currentPlayer % len(board.board.players)].money -= board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost
+        await ctx.reply(
+            f"Congratulations! You now own {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].name}. Your new balance is {board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
+
+
+@client.command()
+async def endturn(ctx):
+    if ctx.author == board.board.players[board.board.currentPlayer % len(board.board.players)].name:
+        board.board.currentPlayer += 1
+        await ctx.send(
+            f"It is now {board.board.players[board.board.currentPlayer % len(board.board.players)].name}'s turn.")
 
 
 client.run('ODE4MjE2NTI2ODYzMjY5OTA4.YEU1hQ.5evOHgwKAtzdRGMMXfNgSQew6Cc')
