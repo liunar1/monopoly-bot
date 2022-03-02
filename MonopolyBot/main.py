@@ -2,7 +2,7 @@ from nextcord.ext import commands
 from nextcord import User
 from models import board
 from models.player import Player
-from models import properties
+from models.space import Space
 import action
 
 client = commands.Bot(command_prefix='$')
@@ -38,7 +38,7 @@ async def join(ctx):
         if in_game:
             await ctx.reply("You are already in the game. You can't join it again you fucking clown!")
         else:
-            board.board.players.append(Player(ctx.author, 1500, 0))
+            board.board.players.append(Player(ctx.author, 1500, 0, 0, 0))
             await ctx.reply(f"{board.board.players[len(board.board.players) - 1].name} has joined the game.")
     else:
         await ctx.reply("Sorry, but the game is full. Please go find more friends to create a new game.")
@@ -88,18 +88,22 @@ async def roll(ctx):
                 f"You rolled a {board.board.players[board.board.currentPlayer % len(board.board.players)].rolling()}!")
             await ctx.send(
                 f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has now landed on {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].name}")
-            if board.board.spaces[
-                board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(
-                    board.board.players[board.board.currentPlayer % len(board.board.players)]) == "unowned":
-                buyable()
-                await ctx.reply(
-                    f"This property is unowned. Would you like to buy it for ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost}?")
+            if type(board.board.spaces[
+                    board.board.players[board.board.currentPlayer % len(board.board.players)].position]) is Space:
+                await ctx.reply(board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(board.board.players[board.board.currentPlayer % len(board.board.players)]))
             else:
-                await ctx.reply(
-                    f"This property is owned by {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name}")
-                await ctx.send(
-                    f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has paid {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name} ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].rent} for rent")
-                await ctx.reply(f"Your new balance is ${board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
+                if board.board.spaces[
+                    board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(
+                        board.board.players[board.board.currentPlayer % len(board.board.players)]) == "unowned":
+                    buyable()
+                    await ctx.reply(
+                        f"This property is unowned. Would you like to buy it for ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost}?")
+                else:
+                    await ctx.reply(
+                        f"This property is owned by {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name}")
+                    await ctx.send(
+                        f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has paid {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name} ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].rent} for rent")
+                    await ctx.reply(f"Your new balance is ${board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
         else:
             await ctx.reply("Bro stop trying to roll it's not even your fucking turn")
 
