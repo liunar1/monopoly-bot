@@ -9,46 +9,46 @@ class Board:
         self.currentPlayer = None
         self.players = []
         self.spaces = [
-            # GO
-            Home("Mediterranean Avenue", action.land_on_property, 60, 2, None, Color.BROWN, 0),
-            # Community Chest
-            Home("Baltic Avenue", action.land_on_property, 60, 4, None, Color.BROWN, 0),
-            # Income Tax
+            Space("GO", action.collect_from_go),
+            Home("Mediterranean Avenue", action.land_on_property, 60, 2, 4, 10, 30, 90, 160, 250, None, Color.BROWN, 0, 0),
+            Space("Community Chest", action.community_chest),
+            Home("Baltic Avenue", action.land_on_property, 60, 4, 8, 20, 60, 180, 320, 450, None, Color.BROWN, 0, 0),
+            Space("Income Tax", action.income_tax),
             Railroad("Reading Railroad", action.land_on_property, 200, 25, None),
-            Home("Oriental Avenue", action.land_on_property, 100, 6, None, Color.LIGHT_BLUE, 0),
-            # Chance
-            Home("Vermont", action.land_on_property, 100, 6, None, Color.LIGHT_BLUE, 0),
-            Home("Connecticut", action.land_on_property, 120, 8, None, Color.LIGHT_BLUE, 0),
-            # Jail
-            Home("St. Charles Place", action.land_on_property, 140, 10, None, Color.PINK, 0),
+            Home("Oriental Avenue", action.land_on_property, 100, 6, 12, 30, 90, 270, 400, 550, None, Color.LIGHT_BLUE, 0, 0),
+            Space("Chance", action.chance),
+            Home("Vermont", action.land_on_property, 100, 6, 12, 30, 90, 270, 400, 550, None, Color.LIGHT_BLUE, 0, 0),
+            Home("Connecticut", action.land_on_property, 120, 8, 16, 40, 100, 300, 450, 600, None, Color.LIGHT_BLUE, 0, 0),
+            Space("Jail", action.prison),
+            Home("St. Charles Place", action.land_on_property, 140, 10, 20, 50, 150, 450, 625, 750, None, Color.PINK, 0, 0),
             Utility("Electric Company", action.land_on_property, 150, None, None),
-            Home("States Avenue", action.land_on_property, 140, 10, None, Color.PINK, 0),
-            Home("Virginia Avenue", action.land_on_property, 160, 12, None, Color.PINK, 0),
+            Home("States Avenue", action.land_on_property, 140, 10, 20, 50, 150, 450, 625, 750, None, Color.PINK, 0, 0),
+            Home("Virginia Avenue", action.land_on_property, 160, 12, 24, 60, 180, 500, 700, 900, None, Color.PINK, 0, 0),
             Railroad("Pennsylvania Railroad", action.land_on_property, 200, 25, None),
-            Home("St. James Place", action.land_on_property, 180, 14, None, Color.ORANGE, 0),
-            # Community Chest
-            Home("Tennessee Avenue", action.land_on_property, 180, 14, None, Color.ORANGE, 0),
-            Home("New York Avenue", action.land_on_property, 200, 16, None, Color.ORANGE, 0),
-            # Free Parking
-            Home("Kentucky Avenue", action.land_on_property, 220, 18, None, Color.RED, 0),
-            # Chance
-            Home("Indiana Avenue", action.land_on_property, 220, 18, None, Color.RED, 0),
-            Home("Illinois Avenue", action.land_on_property, 240, 20, None, Color.RED, 0),
+            Home("St. James Place", action.land_on_property, 180, 14, 28, 70, 200, 550, 750, 950, None, Color.ORANGE, 0, 0),
+            Space("Community Chest", action.community_chest),
+            Home("Tennessee Avenue", action.land_on_property, 180, 14, 28, 70, 200, 550, 750, 950, None, Color.ORANGE, 0, 0),
+            Home("New York Avenue", action.land_on_property, 200, 16, 32, 80, 220, 600, 800, 1000, None, Color.ORANGE, 0, 0),
+            Space("Free Parking", action.free_parking),
+            Home("Kentucky Avenue", action.land_on_property, 220, 18, 36, 90, 250, 700, 875, 1050, None, Color.RED, 0, 0),
+            Space("Chance", action.chance),
+            Home("Indiana Avenue", action.land_on_property, 220, 18, 36, 90, 250, 700, 875, 1050, None, Color.RED, 0, 0),
+            Home("Illinois Avenue", action.land_on_property, 240, 20, 40, 100, 300, 750, 925, 1100, None, Color.RED, 0, 0),
             Railroad("B. & O. Railroad", action.land_on_property, 200, 25, None),
-            Home("Atlantic Avenue", action.land_on_property, 260, 22, None, Color.YELLOW, 0),
-            Home("Ventnor Avenue", action.land_on_property, 260, 22, None, Color.YELLOW, 0),
+            Home("Atlantic Avenue", action.land_on_property, 260, 22, 44, 110, 330, 800, 975, 1150, None, Color.YELLOW, 0, 0),
+            Home("Ventnor Avenue", action.land_on_property, 260, 22, 44, 110, 330, 800, 975, 1150, None, Color.YELLOW, 0, 0),
             Utility("Water Works", action.land_on_property, 150, None, None),
-            Home("Marvin Gardens", action.land_on_property, 280, 24, None, Color.GREEN, 0),
-            # Go to Jail
-            Home("Pacific Avenue", action.land_on_property, 300, 26, None, Color.GREEN, 0),
-            Home("North Carolina Avenue", action.land_on_property, 300, 26, None, Color.GREEN, 0),
-            # Community Chest
-            Home("Pennsylvania Avenue", action.land_on_property, 320, 28, None, Color.GREEN, 0),
+            Home("Marvin Gardens", action.land_on_property, 280, 24, 48, 120, 360, 850, 1025, 1200, None, Color.GREEN, 0, 0),
+            Space("Go to Jail", action.jailed),
+            Home("Pacific Avenue", action.land_on_property, 300, 26, 52, 130, 390, 900, 1100, 1275, None, Color.GREEN, 0, 0),
+            Home("North Carolina Avenue", action.land_on_property, 300, 26, 52, 130, 390, 900, 1100, 1275, None, Color.GREEN, 0, 0),
+            Space("Community Chest", action.community_chest),
+            Home("Pennsylvania Avenue", action.land_on_property, 320, 28, 56, 150, 450, 1000, 1200, 1400, None, Color.GREEN, 0, 0),
             Railroad("Short Line", action.land_on_property, 200, 25, None),
-            # Chance
-            Home("Park Place", action.land_on_property, 350, 35, None, Color.DARK_BLUE, 0),
-            # Luxury Tax
-            Home("Boardwalk", action.land_on_property, 400, 50, None, Color.DARK_BLUE, 0),
+            Space("Chance", action.chance),
+            Home("Park Place", action.land_on_property, 350, 35, 70, 175, 500, 1100, 1300, 1500, None, Color.DARK_BLUE, 0, 0),
+            Space("Luxury Tax", action.luxury_tax),
+            Home("Boardwalk", action.land_on_property, 400, 50, 100, 200, 600, 1400, 1700, 2000, None, Color.DARK_BLUE, 0, 0),
         ]
 
 

@@ -35,70 +35,16 @@ class Color(enum.Enum):
 
 
 class Home(Property):
-    def __init__(self, name, action, cost, rent, owner: Optional[Player], color: Color, houses: int):
+    def __init__(self, name, action, cost, rent, group_rent, rent_house1, rent_house2, rent_house3, rent_house4, rent_hotel, owner: Optional[Player], color: Color, houses: int, hotels: int):
         super().__init__(name, action, cost, owner)
         self.rent = rent
+        self.group_rent = group_rent
+        self.rent_house1 = rent_house1
+        self.rent_house2 = rent_house2
+        self.rent_house3 = rent_house3
+        self.rent_house4 = rent_house4
+        self.rent_hotel = rent_hotel
         self.color = color
         self.houses = houses
+        self.hotels = hotels
 
-
-'''
-no clue where this is supposed to go or what this is supposed to be so I'm leaving it as a comment here; should this be
-a dictionary, list... ??? wtf??? there has to be a better way to do this bro
-        if Home.color == BROWN:
-            if Home.houses = 1:
-                rent = 5 * rent
-            if Home.houses = 2:
-                rent = 3 * rent (previously updated rent with one house)
-            if Home.houses = 3:
-                rent = 3 * rent (previously updated rent with one house)
-            if Home.houses = 4:
-                rent = rent(1 house) * 16
-            if Home.houses = 5:
-                if Home.name is "Mediterranean Avenue": 
-                    rent = 250
-                if Home.name is "Baltic Avenue":
-                    rent = 450
-        if Home.color == LIGHT_BLUE:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == PINK:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == ORANGE:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == RED:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == YELLOW:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == GREEN:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-        if Home.color == DARK_BLUE:
-            if Home.houses = 1:
-            if Home.houses = 2:
-            if Home.houses = 3:
-            if Home.houses = 4:
-            if Home.houses = 5:
-'''
