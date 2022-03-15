@@ -1,8 +1,9 @@
 from nextcord.ext import commands
-from nextcord import User
 from models import board
 from models.player import Player
 from models.space import Space
+from models.properties import Railroad
+from models.properties import Utility
 import action
 
 client = commands.Bot(command_prefix='$')
@@ -46,7 +47,6 @@ async def join(ctx):
         board.board.currentPlayer = 0
         await ctx.reply(
             f"The game is now full. {board.board.players[board.board.currentPlayer].name} will take the first turn.")
-
     # print(f"{len(board.board.players)} is how  many people joined the game")
 
 
@@ -71,6 +71,9 @@ async def check(ctx):
         await ctx.reply("You're not in this game. Please go find more friends to create a new game.")
 
 
+current_player = board.board.players[board.board.currentPlayer % len(board.board.players)]
+
+
 @client.command()
 async def roll(ctx):
     if board.board is None:
@@ -83,52 +86,76 @@ async def roll(ctx):
     if in_game is False:
         await ctx.reply("What the fuck you're not even in the game stop trying to roll the dice")
     else:
-        if board.board.players[board.board.currentPlayer % len(board.board.players)].name == ctx.author:
+        if current_player.name == ctx.author:
+            player_position_before_rolling = current_player.position
             await ctx.reply(
-                f"You rolled a {board.board.players[board.board.currentPlayer % len(board.board.players)].rolling()}!")
+                f"You rolled a {current_player.rolling()}!")
+            if current_player.position < player_position_before_rolling:
+                current_player.money += 200
+                await ctx.reply(f"{current_player.name} has passed GO. You have been awarded $200 and your new balance is {current_player.money}")
             await ctx.send(
-                f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has now landed on {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].name}")
+                f"{current_player.name} has now landed on {board.board.spaces[current_player.position].name}")
             if type(board.board.spaces[
-                    board.board.players[board.board.currentPlayer % len(board.board.players)].position]) is Space:
-                await ctx.reply(board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(board.board.players[board.board.currentPlayer % len(board.board.players)]))
+                        current_player.position]) is Space:
+                if board.board.spaces[current_player.position].action is action.chance or action.community_chest:
+                    await ctx.reply(board.board.spaces[current_player.position].action)
+                    if board.board.spaces[current_player.position].action(current_player)[1]:
+                        await ctx.reply(
+                            f"{current_player.name} has now landed on {board.board.spaces[current_player.position].name}")
+                    if board.board.spaces[current_player.position].action(current_player)[2]:
+                        await ctx.reply(f"{current_player.name}'s new balance is {current_player.money}")
+                    if board.board.spaces[current_player.position].action(current_player)[3]:
+                        if board.board.spaces[
+                            current_player.position].action(
+                            current_player) == "unowned":
+                            await ctx.reply(
+                                f"This property is unowned. Would you like to buy it for ${board.board.spaces[current_player.position].cost}?")
+                        else:
+                            await ctx.reply(
+                                f"This property is owned by {board.board.spaces[current_player.position].owner.name}")
+                            if board.board.spaces[current_player.position] is Railroad:
+                                current_player.money -= board.board.spaces[current_player.position].rent
+                                board.board.spaces[current_player.position].owner.money += board.board.spaces[current_player.position].rent
+                            elif board.board.spaces[current_player.position] is Utility:
+                                await ctx.reply(f"The computer will roll for you. You rolled a {current_player.rolling()}!")
+                            await ctx.send(
+                                f"{current_player.name} has paid {board.board.spaces[current_player.position].owner.name} ${board.board.spaces[current_player.position].rent} for rent")
+                            await ctx.reply(f"Your new balance is ${current_player.money}")
+
+                else:
+                    await ctx.reply(board.board.spaces[current_player.position].action(current_player))
             else:
                 if board.board.spaces[
-                    board.board.players[board.board.currentPlayer % len(board.board.players)].position].action(
-                        board.board.players[board.board.currentPlayer % len(board.board.players)]) == "unowned":
-                    buyable()
+                    current_player.position].action(
+                    current_player) == "unowned":
                     await ctx.reply(
-                        f"This property is unowned. Would you like to buy it for ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost}?")
+                        f"This property is unowned. Would you like to buy it for ${board.board.spaces[current_player.position].cost}?")
                 else:
                     await ctx.reply(
-                        f"This property is owned by {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name}")
+                        f"This property is owned by {board.board.spaces[current_player.position].owner.name}")
                     await ctx.send(
-                        f"{board.board.players[board.board.currentPlayer % len(board.board.players)].name} has paid {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner.name} ${board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].rent} for rent")
-                    await ctx.reply(f"Your new balance is ${board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
+                        f"{current_player.name} has paid {board.board.spaces[current_player.position].owner.name} ${board.board.spaces[current_player.position].rent} for rent")
+                    await ctx.reply(f"Your new balance is ${current_player.money}")
         else:
             await ctx.reply("Bro stop trying to roll it's not even your fucking turn")
-
-
-def buyable():
-    return True
+        print(current_player.name)
 
 
 @client.command()
 async def buy(ctx):
-    if ctx.author == board.board.players[board.board.currentPlayer % len(board.board.players)].name and buyable:
-        board.board.spaces[
-            board.board.players[board.board.currentPlayer % len(board.board.players)].position].owner = \
-        board.board.players[board.board.currentPlayer % len(board.board.players)]
-        board.board.players[board.board.currentPlayer % len(board.board.players)].money -= board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].cost
+    if ctx.author == current_player.name and board.board.spaces[current_player.position].action(
+            current_player) == "unowned":
+        board.board.spaces[current_player.position].owner = current_player
+        current_player.money -= board.board.spaces[current_player.position].cost
         await ctx.reply(
-            f"Congratulations! You now own {board.board.spaces[board.board.players[board.board.currentPlayer % len(board.board.players)].position].name}. Your new balance is {board.board.players[board.board.currentPlayer % len(board.board.players)].money}")
+            f"Congratulations! You now own {board.board.spaces[current_player.position].name}. Your new balance is {current_player.money}")
 
 
 @client.command()
 async def endturn(ctx):
-    if ctx.author == board.board.players[board.board.currentPlayer % len(board.board.players)].name:
+    if ctx.author == current_player.name:
         board.board.currentPlayer += 1
-        await ctx.send(
-            f"It is now {board.board.players[board.board.currentPlayer % len(board.board.players)].name}'s turn.")
+        await ctx.send(f"It is now {current_player.name}'s turn.")
 
 
 client.run('ODE4MjE2NTI2ODYzMjY5OTA4.YEU1hQ.5evOHgwKAtzdRGMMXfNgSQew6Cc')
