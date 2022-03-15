@@ -18,6 +18,7 @@ class Player:
         dice_value = 2
             # random.randint(2, 12)
         self.position += dice_value
+        self.position %= 40
         return dice_value
 
 
