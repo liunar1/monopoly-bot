@@ -8,16 +8,15 @@ def land_on_property(current_player):
     current_space = board.games[0].players[board.games[0].current_player % len(board.games[0].players)].position
     property = board.games[0].spaces[current_space]
     owner = property.owner
-    if board.games[0] is None:
-        return
+    if owner is None:
+        return "This property is unowned. Would you like to buy it? \n Use command $buy to buy this property. Otherwise, end your turn with $end turn"
+    elif owner.name == current_player.name:
+        return "You own this property"
     else:
-        if owner is None:
-            return "This property is unowned. Would you like to buy it?"
-        else:
-            rent = rent_calculation(property)
-            current_player.money -= rent
-            owner.money += rent
-            return f"This property is owned by {owner.name} and your rent costs ${rent}. Your new balance is ${current_player.money}"
+        rent = rent_calculation(property)
+        current_player.money -= rent
+        owner.money += rent
+        return f"This property is owned by {owner.name} and your rent costs ${rent}. Your new balance is ${current_player.money}"
 
 def rent_calculation(property):
     rent = 0
@@ -32,6 +31,7 @@ def rent_calculation(property):
         # ie. if a player owned 2 brown homes, then this is a full set
         if len(owner.homes[color][0]) == owner.homes[color][1]:
             rent *= 2
+        return
     elif type(property) == Railroad:
         rent = property.rent * pow(2, owner.railroads - 1)
     return rent

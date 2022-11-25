@@ -10,6 +10,7 @@ intents = nextcord.Intents.all()
 intents.message_content = True # this is to allow the bot to send messages
 bot = commands.Bot(command_prefix='$', intents=intents) # $ goes before every command
 
+
 # event will run when the bot is online
 @bot.event
 async def on_ready():
@@ -95,9 +96,6 @@ async def buy(ctx, *args):
         current_player.buy_hotel(games[0].spaces[current_player.position])
         await ctx.send(f'{args[0]} is not purchasable!')
 
-@bot.command()
-async def free(ctx): # free from jail
-    pass
 
 @bot.command()
 async def end(ctx):
