@@ -43,7 +43,7 @@ class Board:
           Home("Ventnor Avenue", action.land_on_property, 260, [22, 110, 330, 800, 975, 1150], None, Color.YELLOW, 0),
           Utility("Water Works", action.land_on_property, 150, None, None),
           Home("Marvin Gardens", action.land_on_property, 280, [24, 120, 360, 850, 1025, 1200], None, Color.GREEN, 0),
-          Space("Go to Jail", action.jailed),
+          Space("Go to Jail", action.go_to_jail),
           Home("Pacific Avenue", action.land_on_property, 300, [26, 130, 390, 900, 1100, 1275], None, Color.GREEN, 0),
           Home("North Carolina Avenue", action.land_on_property, 300, [26, 130, 390, 900, 1100, 1275], None, Color.GREEN, 0),
           Space("Community Chest", action.community_chest),
@@ -56,4 +56,4 @@ class Board:
           ]
 
 
-games = None
+games = []

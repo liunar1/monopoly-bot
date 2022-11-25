@@ -8,16 +8,21 @@ def land_on_property(current_player):
     current_space = board.games[0].players[board.games[0].current_player % len(board.games[0].players)].position
     property = board.games[0].spaces[current_space]
     owner = property.owner
-    if board.games[0] is None:
-        return
+    if owner is None:
+        return "This property is unowned. Would you like to buy it? \n Use command $buy to buy this property. Otherwise, end your turn with $end turn"
+    elif owner.name == current_player.name:
+        return "You own this property"
     else:
-        if owner is None:
-            return "This property is unowned. Would you like to buy it?"
-        else:
-            rent = rent_calculation(property)
-            current_player.money -= rent
-            owner.money += rent
-            return f"This property is owned by {owner.name} and your rent costs ${rent}. Your new balance is ${current_player.money}"
+        rent = rent_calculation(property)
+        if current_player.adv_to_rail: 
+            rent *= 2
+            current_player.adv_to_rail = False
+        elif current_player.roll_for_util:
+            rent *= 10
+            current_player.roll_for_util = False
+        current_player.money -= rent
+        owner.money += rent
+        return f"This property is owned by {owner.name} and your rent costs ${rent}. Your new balance is ${current_player.money}"
 
 def rent_calculation(property):
     rent = 0
@@ -32,130 +37,121 @@ def rent_calculation(property):
         # ie. if a player owned 2 brown homes, then this is a full set
         if len(owner.homes[color][0]) == owner.homes[color][1]:
             rent *= 2
+        return
     elif type(property) == Railroad:
         rent = property.rent * pow(2, owner.railroads - 1)
     return rent
-    
-
-def new_balance(current_player):
-    return f"Your new balance is ${current_player.money}"
 
 
 def collect_from_go(current_player):
-    if board.games[0] is None:
-        return
-    else:
-        current_player.money += 200
-        return f"{current_player.name} has passed GO and earned $200. Your new balance is ${current_player.money}"
+    current_player.money += 200
+    return f"{current_player.name} has passed GO and earned $200. Your new balance is ${current_player.money}"
 
 
 def luxury_tax(current_player):
-    if board.games[0] is None:
-        return
-    else:
-        current_player.money -= 100
-        return f"{current_player.name} has paid $100 in luxury tax. Your new balance is ${current_player.money}"
+    current_player.money -= 100
+    return f"{current_player.name} has paid $100 in luxury tax. Your new balance is ${current_player.money}"
 
 
 def income_tax(current_player):
-    if board.games[0] is None:
-        return
-    else:
-        current_player.money -= 200
-        return f"{current_player.name} has paid $200 in luxury tax. Your new balance is ${current_player.money}"
+    current_player.money -= 200
+    return f"{current_player.name} has paid $200 in luxury tax. Your new balance is ${current_player.money}"
 
 
 def advance_to_boardwalk(current_player):
     current_player.position = 39
+    current_player.new_space = True
     return "Advance to Boardwalk"
 
 
 def advance_to_go(current_player):
     current_player.position = 0
-    current_player.new_balance = True
-    return "Advance to Go (Collect $200)"
+    return f"Advance to Go (Collect $200). Your new balance is ${current_player.money}"
 
 
 def advance_to_illinois(current_player):
-    pass_go = None
     if current_player.position > 24:
-        pass_go = True
+        current_player.pass_go = True
     current_player.position = 24
+    current_player.new_space = True
     return "Advance to Illinois Avenue. If you pass Go, collect $200"
 
 
 def advance_to_stcharles(current_player):
-    pass_go = None
     if current_player.position > 11:
-        pass_go = True
+        current_player.pass_go = True
     current_player.position = 11
+    current_player.new_space = True
     return "Advance to St. Charles Place. If you pass Go, collect $200"
 
 
 def advance_to_nearest_railroad(current_player):
-    pass_go = None
     if current_player.position > 35:
-        pass_go = True
+        current_player.pass_go = True
     at_railroad = False
     while not at_railroad:
         if type(current_player.position) is not Railroad:
             current_player.position += 1
         else:
             at_railroad = True
+    if current_player.position.owner and current_player.position.owner != current_player:
+        current_player.adv_to_rail = True
+    current_player.new_space = True
     return "Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay wonder twice the rental to which they are otherwise entitled"
 
 
 def advance_to_nearest_utility(current_player):
-    pass_go = None
     if current_player.position > 28:
-        pass_go = True
+        current_player.pass_go = True
     at_utility = False
     while not at_utility:
         if type(current_player.position) is not Utility:
             current_player.position += 1
         else:
             at_utility = True
+    if current_player.position.owner  and current_player.position.owner != current_player:
+        current_player.roll_for_util = True
+    current_player.new_space = True
+    current_player.roll = True
     return "Advance token to nearest Utility. If unowned, you may buy it from the Bank. If owned, throw dice and pay owner a total ten times amount thrown."
 
 
 def bank_paid_dividend(current_player):
     current_player.money += 50
-    current_player.new_balance = True
-    return "Bank pays you dividend of $50"
+    return f"Bank pays you dividend of $50. Your new balance is ${current_player.money}"
 
 
 def get_out_of_jail_free(current_player):
     current_player.get_out_of_jail_free_cards += 1
-    return "Get Out of Jail Free"
+    return "You have been given a 'Get Out of Jail Free' card"
 
 
 def go_back_three(current_player):
     current_player.position -= 3
+    current_player.new_space = True
     return "Go Back 3 Spaces"
 
 
 def go_to_jail(current_player):
     current_player.position = 10
+    current_player.in_jail = True
     return "Go to Jail. Go directly to Jail, do not pass Go, do not collect $200"
 
 
 def property_maintenance(current_player):
     current_player.money -= current_player.number_of_houses * 25
     current_player.money -= current_player.number_of_hotels * 100
-    current_player.new_balance = True
-    return "Make general repairs on all your property. For each house pay $25. For each hotel pay $100"
+    return f"Make general repairs on all your property. For each house pay $25. For each hotel pay $100. Your new balance is ${current_player.money}"
 
 
 def speeding(current_player):
     current_player.money -= 15
-    current_player.new_balance = True
-    return "Speeding fine $15"
+    return f"Speeding fine $15. Your new balance is ${current_player.money}"
 
 
 def trip_to_reading_railroad(current_player):
-    pass_go = None
     if current_player.position > 5:
-        pass_go = True
+        current_player.pass_go = True
     current_player.position = 5
     return "Take a trip to Reading Railroad. If you pass Go, collect $200"
 
@@ -167,92 +163,82 @@ def selected_chairman(current_player):
             pass
         else:
             board.games[0].players[players].money += 50
-    current_player.new_balance = True
-    return "You have been elected Chairman of the Board. Pay each player $50"
+    return f"You have been elected Chairman of the Board. Pay each player $50. Your new balance is ${current_player.money}"
 
 
 def mature_loan(current_player):
     current_player.money += 150
-    current_player.new_balance = True
-    return "Your building loan matures. Collect $150"
+    return f"Your building loan matures. Collect $150. Your new balance is ${current_player.money}"
 
 
 def bank_error(current_player):
     current_player.money += 200
-    current_player.new_balance = True
-    return "Bank error in your favor. Collect $200"
+    return f"Bank error in your favor. Collect $200. Your new balance is ${current_player.money}"
 
 
 def doctor_fee(current_player):
     current_player.money -= 50
-    current_player.new_balance = True
-    return "Doctor's fee. Pay $50"
+    return f"Doctor's fee. Pay $50. Your new balance is ${current_player.money}"
 
 
 def sale_of_stock(current_player):
     current_player.money += 50
-    current_player.new_balance = True
-    return "From sale of stock you get $50"
+    return f"From sale of stock you get $50. Your new balance is ${current_player.money}"
 
 
 def holiday_funds(current_player):
     current_player.money += 100
-    current_player.new_balance = True
-    return "Holiday fund matures. Receive $100"
+    return f"Holiday fund matures. Receive $100. Your new balance is ${current_player.money}"
 
 
 def income_tax_refund(current_player):
     current_player.money += 20
-    current_player.new_balance = True
-    return "Income tax refund. Collect $20"
+    return f"Income tax refund. Collect $20. Your new balance is ${current_player.money}"
 
 
 def your_birthday(current_player):
-    current_player.new_balance = True
-    return "It is your birthday. Collect $10 from every player"
+    birthday = 0
+    for player in board.games[0].players:
+        birthday += 10
+        player.money -= 10
+    current_player.money = birthday
+    return f"It is your birthday. Collect $10 from every player. Your new balance is ${current_player.money}"
 
 
 def life_insurance(current_player):
     current_player.money += 100
-    current_player.new_balance = True
-    return "Life insurance matures. Collect $100"
+    return f"Life insurance matures. Collect $100. Your new balance is ${current_player.money}"
 
 
 def hospital_fees(current_player):
     current_player.money -= 100
-    current_player.new_balance = True
-    return "Pay hospital fees of $100"
+    return f"Pay hospital fees of $100. Your new balance is ${current_player.money}"
 
 
 def school_fees(current_player):
     current_player.money -= 50
-    current_player.new_balance = True
-    return "Pay school fees of $50"
+    return f"Pay school fees of $50. Your new balance is ${current_player.money}"
 
 
 def consultancy(current_player):
     current_player.money += 25
-    current_player.new_balance = True
-    return "Receive $25 consultancy fee"
+    return f"Receive $25 consultancy fee. Your new balance is ${current_player.money}"
 
 
 def street_repair(current_player):
     current_player.money -= current_player.number_of_houses * 40
     current_player.money -= current_player.number_of_hotels * 115
-    current_player.new_balance = True
-    return f"You are assessed for street repair. $40 per house. $115 per hotel."
+    return f"You are assessed for street repair. $40 per house. $115 per hotel. Your new balance is ${current_player.money}"
 
 
 def beauty(current_player):
     current_player.money += 10
-    current_player.new_balance = True
-    return "You have won second prize in a beauty contest. Collect $10"
+    return f"You have won second prize in a beauty contest. Collect $10. Your new balance is ${current_player.money}"
 
 
 def inheritance(current_player):
     current_player.money += 100
-    current_player.new_balance = True
-    return "You inherit $100"
+    return f"You inherit $100. Your new balance is ${current_player.money}"
 
 
 chance_cards = [
@@ -294,27 +280,17 @@ community_chest_cards = [
 
 
 def chance(current_player):
-    if board.games[0] is None:
-        return
-    else:
-        card_pick = random.randint(0, len(chance_cards) - 1)
-        chance_cards[card_pick](current_player)
+    card_pick = random.randint(0, len(chance_cards) - 1)
+    return chance_cards[card_pick](current_player)
 
 
 def community_chest(current_player):
-    if board.games[0] is None:
-        return
-    else:
-        card_pick = random.randint(0, len(community_chest_cards) - 1)
-        return community_chest_cards[card_pick](current_player)
-
-
-def jailed(current_player):
-    current_player.position = 10
+    card_pick = random.randint(0, len(community_chest_cards) - 1)
+    return community_chest_cards[card_pick](current_player)
 
 
 def free_parking(current_player):
-    pass
+    return "You are in free parking"
 
 
 def prison(current_player):

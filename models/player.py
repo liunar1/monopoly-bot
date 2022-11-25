@@ -13,9 +13,11 @@ class Player:
         self.position = 0
         self.number_of_houses = number_of_houses
         self.number_of_hotels = number_of_hotels
+        self.in_jail = False
         self.get_out_of_jail_free_cards = get_out_of_jail_free_cards
+        self.roll = True # we don't want a player to be able to randomly roll again
         self.pass_go = False
-        self.new_balance = False
+        self.new_space = False
         self.homes = {
             "brown" : [[], 2],
             "light blue" : [[], 3],
@@ -28,11 +30,18 @@ class Player:
         }
         self.railroads = 0 # number of railroads owned
         self.utilities = 0 # number of utilities owned
+        self.adv_to_rail = False
+        self.roll_for_util = False
+        self.double_roll_ct = 0 # number of times player has rolled a double in a row
 
     def rolling(self, player):
         dice_value1 = 0
         dice_value2 = 0
-        dice_value = 5
+        if dice_value1 == dice_value2:
+            player.double_roll_ct += 1
+        else:
+            player.double_roll_ct = 0
+        dice_value = 10
         # dice_value = random.randint(2, 12)
         player.position += dice_value
         if player.position > 40:

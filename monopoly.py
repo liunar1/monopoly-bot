@@ -3,12 +3,14 @@ from nextcord.ext import commands
 from time import sleep
 from models.board import Board, games
 from models.player import Player
-from action import collect_from_go, new_balance
+from action import collect_from_go, land_on_property
+from models.properties import Home, Railroad, Utility
 from updateboard import create_board, join_board, update_board
 
 intents = nextcord.Intents.all()
 intents.message_content = True # this is to allow the bot to send messages
 bot = commands.Bot(command_prefix='$', intents=intents) # $ goes before every command
+
 
 # event will run when the bot is online
 @bot.event
@@ -19,85 +21,128 @@ async def on_ready():
 @bot.command()
 async def create(ctx, num_players: int):
     try:
-        if games:
+        if games[0]:
             await ctx.send('Sorry, there\'s already a game occuring')
-            return
+        return
     except:
         # if num_players < 2 or num_players > 8:
         #     await ctx.reply('Invalid number of players. There must be 2 - 8 players per game')
         #     return
-        games = Board(num_players)
+        games.append(Board(num_players))
         file, embed = create_board()
         await ctx.send(file=file, embed=embed)
-        await ctx.send(f'Game has been created for {games.num_players} players')
+        await ctx.send(f'Game has been created for {games[0].num_players} players')
         await ctx.send(f'Here are the available characters: \nairplane, boat, car, dog, hat, magnet, can, shoe')
+
+@create.error
+async def create_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.reply('Please indicate number of players!')
+    else:
+        await ctx.reply('What are you doing?!')
         
 
 @bot.command()
-async def join(ctx, character):
-    # try:
-    games.characters.remove(character)
-    # except:
-    #     await ctx.reply('Sorry. That character is already taken. Please pick something else!')
-    #     return
-    if len(games.players) >= games.num_players:
-        await ctx.reply(f'Sorry, the game is now full')
-        return
-    # player arguments: player name, character, starting balance ($), number of houses, hotels, and get of jail cards
-    games.players.append(Player(ctx.author, character, 1500, 0, 0, 0))
-    await ctx.send(f'{ctx.author} has joined the game as {character}')
-    if len(games.players) == games.num_players:
-        await ctx.send('Game is now full. Let\'s play!')
-        
+async def join(ctx, character: str):
+    if not games[0]:
+        await ctx.reply('You cannot join a nonexistent game!')
+    else:
+        if character not in games[0].characters:
+            await ctx.reply('That character doesn\'t exist!')
+            return
+        try:
+            games[0].characters.remove(character)
+        except:
+            await ctx.reply('Sorry. That character is already taken. Please pick something else!')
+            return
+        if len(games[0].players) >= games[0].num_players:
+            await ctx.reply(f'Sorry, the game is now full')
+        else:
+            for player in games[0].players:
+                if player.name == ctx.author:
+                    await ctx.reply('You are already in this game!')
+                    return
+            # player arguments: player name, character, starting balance ($), number of houses, hotels, and get of jail cards
+            games[0].players.append(Player(ctx.author, character, 1500, 0, 0, 0))
+            await ctx.send(f'{ctx.author} has joined the game as {character}')
+            if len(games[0].players) == games[0].num_players:
+                await ctx.send('Game is now full. Let\'s play!')
+
+
+@join.error
+async def join(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.reply('Please indicate the character you want to be!')
+
 
 @bot.command()
 async def roll(ctx):
-    player = games[0].players[games[0].current_player]
+    try:
+        player = games[0].players[games[0].current_player]
+    except:
+        await ctx.reply('You are not in a game!')
+        return
     if ctx.author == player.name:
-        await ctx.send(f'{ctx.author} has rolled a {player.rolling(player)}!')
-        current_position = games[0].spaces[player.position]
-        if player.pass_go:
-            collect_from_go(player)
-            player.pass_go = False
-        sleep(2)
-        await ctx.reply(f'You are now on {current_position.name}')
-        # try:
-        await ctx.reply(current_position.action(player))
-        # except:
-        #     print('space has no action / error')
-        #     pass
-        if player.new_balance:
-            await ctx.reply(f'Your new balance is {player.money}')
-            player.new_balance = False
-        if player.pass_go:
-            await ctx.reply(collect_from_go)
-            player.pass_go = False
+        if not player.roll:
+            await ctx.reply('You can\'t roll again!')
+        else:
+            player.roll = False
+            await ctx.send(f'{ctx.author} has rolled a {player.rolling(player)}!')
+            sleep(2)
+            player = games[0].players[games[0].current_player]
+            if player.roll_for_util:
+                await ctx.reply(land_on_property(player))
+            elif player.in_jail:
+                if player.double_roll_ct:
+                    await ctx.send(f'{ctx.author} has rolled a double!')
+                    await ctx.reply('You are now free from jail')
+                    player.in_jail = False
+                    current_position = games[0].spaces[player.position]
+                    await ctx.reply(f'You are now on {current_position.name}')
+                else:
+                    await ctx.send(f'{ctx.author} did not roll a double and is still in jail')
+            else:
+                current_position = games[0].spaces[player.position]
+                await ctx.reply(f'You are now on {current_position.name}')
+                await ctx.reply(current_position.action(player))
+            if player.pass_go:
+                await ctx.send(collect_from_go(player))
+                player.pass_go = False
+            if player.new_space:
+                await ctx.reply(land_on_property(player))
+                player.new_space = False
     else:
         await ctx.reply('Sorry, it\'s not your turn')
 
 @bot.command()
 async def buy(ctx, *args):
     current_player = games[0].players[games[0].current_player]
-    # initially buying the property
-    if not len(args):
-        current_player.buy(current_player, games[0].spaces[current_player.position])
-        await ctx.send(f'{ctx.author} has bought {games[0].spaces[current_player.position].name}!')
-        await ctx.reply(new_balance(current_player))
+    if type(games[0].spaces[current_player.position]) != Home and type(games[0].spaces[current_player.position]) != Utility and type(games[0].spaces[current_player.position]) != Railroad:
+        await ctx.reply('You can\'t buy a non property!')
         return
-        # buying a house / hotel
-    if args[0] == 'house':
-        current_player.buy_house(games[0].spaces[current_player.position])
-        await ctx.send(f'{ctx.author} has bought a house on {games[0].spaces[current_player.position].name}!')
-    elif args[0] == 'hotel':
-        current_player.buy_hotel(games[0].spaces[current_player.position])
-        await ctx.send(f'{ctx.author} has bought a hotel on {games[0].spaces[current_player.position].name}!')
+    property = games[0].spaces[current_player.position]
+    # initially buying the property
+    if not len(args): 
+        if not property.owner:
+            current_player.buy(current_player, property)
+            await ctx.send(f'{ctx.author} has bought {property.name}! Your new balance is ${current_player.money}')
+        else: 
+            await ctx.reply('This property is owned!')
+        return
+    # buying a house / hotel
+    if current_player.position.owner != current_player:
+        await ctx.reply('This property is not yours!')
+        return
     else:
-        current_player.buy_hotel(games[0].spaces[current_player.position])
-        await ctx.send(f'{args[0]} is not purchasable!')
+        if args[0] == 'house':
+            current_player.buy_house(property)
+            await ctx.send(f'{ctx.author} has bought a house on {property.name}!')
+        elif args[0] == 'hotel':
+            current_player.buy_hotel(property)
+            await ctx.send(f'{ctx.author} has bought a hotel on {property.name}!')
+        else:
+            await ctx.send(f'{args[0]} is not purchasable!')
 
-@bot.command()
-async def free(ctx): # free from jail
-    pass
 
 @bot.command()
 async def end(ctx):
@@ -105,7 +150,7 @@ async def end(ctx):
         await ctx.send(f'{ctx.author}\'s turn has ended')
         games[0].current_player += 1 
         games[0].current_player %= len(games[0].players)
-        await ctx.send('Here\'s an update on the properties: ')
+        games[0].players[games[0].current_player].roll = True
         await ctx.send(f'It is now {games[0].players[games[0].current_player].name}\'s turn')
     else:
         await ctx.reply('Sorry, it\'s not your turn')
@@ -121,7 +166,16 @@ async def sell(ctx, *args):
         current_player.buy_hotel(property)
         await ctx.send(f'{ctx.author} has sold a hotel on {property.name}!')
     else:
-        await ctx.send(f'{ctx.author} have sold {property.name}!')
+        await ctx.send(f'{ctx.author} has sold {property.name}!')
+
+@bot.command()
+async def free(ctx):
+    current_player = games[0].players[games[0].current_player]
+    if current_player.get_out_of_jail_free_cards:
+        current_player.get_out_of_jail_free_cards -= 1
+        await ctx.send(f'{ctx.author} is free from jail!')
+    else:
+        await ctx.reply('Sorry, you don\'t have any cards that can get you out of jail')
 
 @bot.command()
 async def mortgage(ctx):
