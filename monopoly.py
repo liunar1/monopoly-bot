@@ -34,6 +34,7 @@ async def create(ctx, num_players: int):
         await ctx.send(f'Game has been created for {games[0].num_players} players')
         await ctx.send(f'Here are the available characters: \nairplane, boat, car, dog, hat, magnet, can, shoe')
 
+
 @create.error
 async def create_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -44,35 +45,42 @@ async def create_error(ctx, error):
 
 @bot.command()
 async def join(ctx, character: str):
-    if not games[0]:
-        await ctx.reply('You cannot join a nonexistent game!')
+    # the first if statement will throw an error to the def join(ctx, error) function
+    if games[0].characters:
+        pass
+    if character not in games[0].characters:
+        await ctx.reply('That character doesn\'t exist!')
+        return
+    try:
+        games[0].characters.remove(character)
+    except:
+        await ctx.reply('Sorry. That character is already taken. Please pick something else!')
+        return
+    if len(games[0].players) >= games[0].num_players:
+        await ctx.reply(f'Sorry, the game is now full')
     else:
-        if character not in games[0].characters:
-            await ctx.reply('That character doesn\'t exist!')
-            return
-        try:
-            games[0].characters.remove(character)
-        except:
-            await ctx.reply('Sorry. That character is already taken. Please pick something else!')
-            return
-        if len(games[0].players) >= games[0].num_players:
-            await ctx.reply(f'Sorry, the game is now full')
-        else:
-            for player in games[0].players:
-                if player.name == ctx.author:
-                    await ctx.reply('You are already in this game!')
-                    return
-            # player arguments: player name, character, starting balance ($), number of houses, hotels, and get of jail cards
-            games[0].players.append(Player(ctx.author, character, 1500, 0, 0, 0))
-            await ctx.send(f'{ctx.author} has joined the game as {character}')
-            if len(games[0].players) == games[0].num_players:
-                await ctx.send('Game is now full. Let\'s play!')
+        for player in games[0].players:
+            if player.name == ctx.author:
+                await ctx.reply('You are already in this game!')
+                return
+        # player arguments: player name, character, starting balance ($), number of houses, hotels, and get of jail cards
+        current_player = Player(ctx.author, character, 1500, 0, 0, 0)
+        games[0].players.append(current_player)
+        file, embed = join_board(current_player.character)
+
+        await ctx.send(file=file, embed=embed)
+        await ctx.send(f'{ctx.author} has joined the game as {character}')
+
+        if len(games[0].players) == games[0].num_players:
+            await ctx.send('Game is now full. Let\'s play!')
 
 
 @join.error
 async def join(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.reply('Please indicate the character you want to be!')
+    else:
+        await ctx.reply('You cannot join a nonexistent game!')
 
 
 @bot.command()
@@ -146,7 +154,22 @@ async def buy(ctx, *args):
 
 @bot.command()
 async def end(ctx):
-    if ctx.author == games[0].players[games[0].current_player].name:
+    player = games[0].players[games[0].current_player]
+    if ctx.author == player.name:
+        if player.money < 0:
+            if not player.confirm_bankrupt:
+                player.confirm_bankrupt = True
+                await ctx.reply('You are currently in debt. If you do $end, you will automatically be forced into bankruptcy. Confirm the command once again if this is your decision')
+                return
+            else:
+                # unfinished command
+                if len(games[0].players) == 1:
+                    games[0].current_player += 1 
+                    games[0].current_player %= len(games[0].players)
+                    await ctx.send(f'Congratulations {games[0].players[games[0].current_player].name}! You won the game!')
+                    await ctx.send('The game is now over. Please start a new game')
+                    games.pop()
+                    return
         await ctx.send(f'{ctx.author}\'s turn has ended')
         games[0].current_player += 1 
         games[0].current_player %= len(games[0].players)
