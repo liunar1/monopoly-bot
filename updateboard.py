@@ -14,17 +14,19 @@ def create_board():
 
     return file, embed
 
-def join_board():
-
+def join_board(character):
     boardimg = Image.open("gameboard.jpg") # img size is 1920 by 1920
     boardimgbackground = boardimg.copy()
 
+    piece = Image.open(f"models/pieceimgs/{character}.png")
+    boardimgbackground.paste(piece, (100, 100))
+    
     boardimgbackground.save("gameboard.jpg", quality=95)
-
+    
     file = nextcord.File("gameboard.jpg", filename="gameboard.jpg")
     embed = nextcord.Embed()
     embed.set_image(url="attachment://gameboard.jpg")
-
+    
     return file, embed
 
 def update_board():

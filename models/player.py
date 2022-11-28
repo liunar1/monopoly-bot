@@ -6,7 +6,7 @@ class Player:
     name = None
     position = None
 
-    def __init__(self, name: str, character, money: int, number_of_houses: int, number_of_hotels: int, get_out_of_jail_free_cards: int):
+    def __init__(self, name: str, character: str, money: int, number_of_houses: int, number_of_hotels: int, get_out_of_jail_free_cards: int):
         self.name = name
         self.character = character
         self.money = money
