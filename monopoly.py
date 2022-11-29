@@ -120,10 +120,10 @@ async def roll(ctx):
                 await ctx.reply(land_on_property(player))
                 player.new_space = False
         file, embed = update_board()
-
         await ctx.send(file=file, embed=embed)
     else:
         await ctx.reply('Sorry, it\'s not your turn')
+
 
 @bot.command()
 async def buy(ctx, *args):
@@ -135,24 +135,78 @@ async def buy(ctx, *args):
     # initially buying the property
     if not len(args): 
         if not property.owner:
-            current_player.buy(current_player, property)
-            await ctx.send(f'{ctx.author} has bought {property.name}! Your new balance is ${current_player.money}')
+            current_player.buy(current_player, property, current_player.position)
+            file, embed = update_board()
+            await ctx.send(file=file, embed=embed)
+            await ctx.reply(f'You have bought {property.name}! Your new balance is ${current_player.money}')
         else: 
             await ctx.reply('This property is owned!')
         return
     # buying a house / hotel
-    if current_player.position.owner != current_player:
+    if property.owner != current_player:
         await ctx.reply('This property is not yours!')
         return
+    elif type(property) == Railroad:
+        ctx.reply('What are you trying to do on a railroad...?')
+    elif type(property) == Utility:
+        ctx.reply('What are you trying to do on a utility...?')
     else:
-        if args[0] == 'house':
-            current_player.buy_house(property)
-            await ctx.send(f'{ctx.author} has bought a house on {property.name}!')
-        elif args[0] == 'hotel':
-            current_player.buy_hotel(property)
-            await ctx.send(f'{ctx.author} has bought a hotel on {property.name}!')
+        if current_player.properties["homes"][property.color.value][1] != len(current_player.properties["homes"][property.color.value][0]):
+            await ctx.reply('You don\'t own the entire color set!')
         else:
-            await ctx.send(f'{args[0]} is not purchasable!')
+            if args[0] == 'house':
+                if property.houses < 4:
+                    current_player.buy_house(current_player, property)
+                    file, embed = update_board()
+                    await ctx.send(file=file, embed=embed)
+                    await ctx.reply(f'You has bought a house on {property.name}! Your new balance is ${current_player.money}')
+                else:
+                    await ctx.reply('You already have 4 houses. See if you can buy a hotel!')
+            elif args[0] == 'hotel':
+                if property.houses == 4:
+                    current_player.buy_hotel(current_player, property)
+                    file, embed = update_board()
+                    await ctx.send(file=file, embed=embed)
+                    await ctx.reply(f'You has bought a hotel on {property.name}! Your new balance is ${current_player.money}')
+                elif property.houses < 4:
+                    await ctx.reply('You need to buy more houses before you can buy a hotel!')
+                else:
+                    await ctx.reply('You can only buy one hotel on this property!')
+            else:
+                await ctx.send(f'{args[0]} is not purchasable!')
+
+
+@bot.command()
+async def sell(ctx, *args):
+    current_player = games[0].players[games[0].current_player]
+    property = games[0].spaces[current_player.position]
+    if not len(args):
+        if not property.owner:
+            await ctx.reply('You can\'t sell the bank\'s property!')
+        elif property.owner != current_player:
+            await ctx.reply('You can\'t sell someone else\'s property!')
+        else: 
+            current_player.sell(current_player, property, current_player.position)
+            file, embed = update_board()
+            await ctx.send(file=file, embed=embed)
+            await ctx.reply(f'You has sold {property.name}! Your new balance is ${current_player.money}')
+        return
+    if not property.owner:
+            await ctx.reply('There are no houses on the bank\'s property!')
+    elif property.owner != current_player:
+        await ctx.reply('You can\'t sell someone else\'s house!')
+    elif args[0] == 'house':
+        current_player.sell_house(current_player, property)
+        file, embed = update_board()
+        await ctx.send(file=file, embed=embed)
+        await ctx.send(f'{ctx.author} has sold a house on {property.name}!')
+    elif args[0] == 'hotel':
+        current_player.sell_hotel(current_player, property)
+        file, embed = update_board()
+        await ctx.send(file=file, embed=embed)
+        await ctx.send(f'{ctx.author} has sold a hotel on {property.name}!')
+    else:
+        await ctx.reply('What are you even selling??')
 
 
 @bot.command()
@@ -173,6 +227,7 @@ async def end(ctx):
                     await ctx.send('The game is now over. Please start a new game')
                     games.pop()
                     return
+        else: player.confirm_bankrupt = False
         await ctx.send(f'{ctx.author}\'s turn has ended')
         games[0].current_player += 1 
         games[0].current_player %= len(games[0].players)
@@ -181,18 +236,6 @@ async def end(ctx):
     else:
         await ctx.reply('Sorry, it\'s not your turn')
 
-@bot.command()
-async def sell(ctx, *args):
-    current_player = games[0].players[games[0].current_player]
-    property = games[0].spaces[current_player.position]
-    if args[0] == 'house':
-        current_player.buy_house(property)
-        await ctx.send(f'{ctx.author} has sold a house on {property.name}!')
-    elif args[0] == 'hotel':
-        current_player.buy_hotel(property)
-        await ctx.send(f'{ctx.author} has sold a hotel on {property.name}!')
-    else:
-        await ctx.send(f'{ctx.author} has sold {property.name}!')
 
 @bot.command()
 async def free(ctx):
@@ -203,9 +246,6 @@ async def free(ctx):
     else:
         await ctx.reply('Sorry, you don\'t have any cards that can get you out of jail')
 
-@bot.command()
-async def mortgage(ctx):
-    pass
 
 @bot.command()
 async def bankrupt(ctx):
