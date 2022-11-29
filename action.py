@@ -29,15 +29,15 @@ def rent_calculation(property):
     owner = property.owner
     if type(property) == Home:
         houses = property.houses # houses is 4 or less but 1 hotel = 5 houses
-        color = property.color
+        color = property.color.value
         rent = property.rent[houses] # if there are no houses
 
-        # owner.homes[color] is an array where [0] would be all the home groups in a specific color 
+        # owner.properties["homes"][color] is an array where [0] would be all the home groups in a specific color 
         # and [1] would be number of homes needed in the group color to be a full group
         # ie. if a player owned 2 brown homes, then this is a full set
-        if len(owner.homes[color][0]) == owner.homes[color][1]:
+        if len(owner.properties["homes"][color][0]) == owner.properties["homes"][color][1] and houses == 0:
             rent *= 2
-        return
+        return rent
     elif type(property) == Railroad:
         rent = property.rent * pow(2, owner.railroads - 1)
     return rent
@@ -280,12 +280,14 @@ community_chest_cards = [
 
 
 def chance(current_player):
-    card_pick = random.randint(0, len(chance_cards) - 1)
+    card_pick = 1
+    # random.randint(0, len(chance_cards) - 1)
     return chance_cards[card_pick](current_player)
 
 
 def community_chest(current_player):
-    card_pick = random.randint(0, len(community_chest_cards) - 1)
+    card_pick = 1
+    # random.randint(0, len(community_chest_cards) - 1)
     return community_chest_cards[card_pick](current_player)
 
 

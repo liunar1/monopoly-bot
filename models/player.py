@@ -22,16 +22,21 @@ class Player:
         self.roll = True # we don't want a player to be able to randomly roll again
         self.pass_go = False
         self.new_space = False
-        self.homes = {
-            "brown" : [[], 2],
-            "light blue" : [[], 3],
-            "pink" : [[], 3],
-            "orange" : [[], 3],
-            "red" : [[], 3],
-            "yellow" : [[], 3],
-            "green" : [[], 3],
-            "dark blue" : [[], 2]
+        self.properties = {
+            "homes" : {
+                "brown" : [[], 2],
+                "light blue" : [[], 3],
+                "pink" : [[], 3],
+                "orange" : [[], 3],
+                "red" : [[], 3],
+                "yellow" : [[], 3],
+                "green" : [[], 3],
+                "dark blue" : [[], 2]
+            },  
+            "railroads" : [],
+            "utilities" : []
         }
+        self.homes = 0
         self.railroads = 0 # number of railroads owned
         self.utilities = 0 # number of utilities owned
         self.adv_to_rail = False
@@ -54,23 +59,50 @@ class Player:
         player.characterx, player.charactery = games[0].spaces[player.position].coords
         return dice_value
     
-    def buy(self, player, property):
+    def buy(self, player, property, position):
         property.owner = player
         player.money -= property.cost
         if type(property) == Home:
-            player.homes[property.color][0].append(property)
+            player.properties["homes"][property.color.value][0].append(position)
         elif type(property) == Railroad:
+            player.properties["railroads"].append(position)
             player.railroads += 1
         else:
+            player.properties["utilities"].append(position)
             player.utilities += 1
 
     def buy_house(self, player, property):
         property.houses += 1
-        player.money -= property.cost
+        player.number_of_houses += 1
+        player.money -= property.house_cost
 
     def buy_hotel(self, player, property): 
         # this should make the total number of houses on the property to equal 5
         property.houses += 1
-        player.money -= property.cost
+        player.number_of_hotels += 1
+        player.money -= property.house_cost
+    
+    def sell(self, player, property, position):
+        property.owner = None
+        player.money += property.cost / 2
+        if type(property) == Home:
+            player.properties["homes"][property.color.value][0].remove(position)
+        elif type(property) == Railroad:
+            player.properties["railroads"].remove(position)
+            player.railroads -= 1
+        else:
+            player.properties["utilities"].remove(position)
+            player.utilities -= 1
+    
+    def sell_house(self, player, property):
+        property.houses -= 1
+        player.number_of_houses -= 1
+        player.money += property.house_cost / 2
+
+    def sell_hotel(self, player, property): 
+        # the total number of houses on the property must be equal to 5
+        property.houses -= 1
+        player.number_of_hotels -= 1
+        player.money += property.house_cost / 2
 
 
