@@ -66,7 +66,7 @@ async def join(ctx, character: str):
         # player arguments: player name, character, starting balance ($), number of houses, hotels, and get of jail cards
         current_player = Player(ctx.author, character, 1500, 0, 0, 0)
         games[0].players.append(current_player)
-        file, embed = join_board(current_player.character)
+        file, embed = join_board(current_player)
 
         await ctx.send(file=file, embed=embed)
         await ctx.send(f'{ctx.author} has joined the game as {character}')
@@ -119,6 +119,9 @@ async def roll(ctx):
             if player.new_space:
                 await ctx.reply(land_on_property(player))
                 player.new_space = False
+        file, embed = update_board()
+
+        await ctx.send(file=file, embed=embed)
     else:
         await ctx.reply('Sorry, it\'s not your turn')
 

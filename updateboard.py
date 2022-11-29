@@ -14,14 +14,15 @@ def create_board():
 
     return file, embed
 
-def join_board(character):
+def join_board(player):
     boardimg = Image.open("gameboard.jpg") # img size is 1920 by 1920
     boardimgbackground = boardimg.copy()
 
-    piece = Image.open(f"models/pieceimgs/{character}.png")
-    boardimgbackground.paste(piece, (100, 100))
+    piece = Image.open(f"models/pieceimgs/{player.character}.png")
     
+    boardimgbackground.paste(piece, (player.characterx, player.charactery))
     boardimgbackground.save("gameboard.jpg", quality=95)
+
     
     file = nextcord.File("gameboard.jpg", filename="gameboard.jpg")
     embed = nextcord.Embed()
@@ -30,11 +31,15 @@ def join_board(character):
     return file, embed
 
 def update_board():
-    img = Image.open("boardimg.jpg") # img size is 1920 by 1920
-    img = img.save("gameboard.jpg")
 
-    boardimg = Image.open("gameboard.jpg")
-    boardimgbackground = boardimg.copy()
+    allplayers = games[0].players
+    allspaces = games[0].spaces
+    img = Image.open("boardimg.jpg") # img size is 1920 by 1920
+    boardimgbackground = img.copy()
+
+    for player in allplayers:
+        image = Image.open(f"models/pieceimgs/{player.character}.png")
+        boardimgbackground.paste(image, (player.characterx, player.charactery))
 
     boardimgbackground.save("gameboard.jpg", quality=95)
 

@@ -1,5 +1,7 @@
 import random
 from models.properties import Home, Railroad
+from models.board import games
+
 
 class Player:
     money = None
@@ -9,6 +11,8 @@ class Player:
     def __init__(self, name: str, character: str, money: int, number_of_houses: int, number_of_hotels: int, get_out_of_jail_free_cards: int):
         self.name = name
         self.character = character
+        self.characterx = 1700
+        self.charactery = 1700
         self.money = money
         self.position = 0
         self.number_of_houses = number_of_houses
@@ -41,12 +45,13 @@ class Player:
             player.double_roll_ct += 1
         else:
             player.double_roll_ct = 0
-        dice_value = 10
+        dice_value = 1
         # dice_value = random.randint(2, 12)
         player.position += dice_value
         if player.position > 40:
             player.pass_go = True
         player.position %= 40
+        player.characterx, player.charactery = games[0].spaces[player.position].coords
         return dice_value
     
     def buy(self, player, property):
