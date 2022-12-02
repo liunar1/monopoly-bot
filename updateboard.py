@@ -37,19 +37,33 @@ def update_board():
     img = Image.open("boardimg.jpg") # img size is 1920 by 1920
     boardimgbackground = img.copy()
 
-    def possessions(player, image, property: str):
-        if property == "homes":
-            for colors in player.properties[property]: # going through each color
-                for pos in player.properties[property][colors][0]: # positions in sublist of sublist
-                    boardimgbackground.paste(image, (games[0].spaces[pos].house_coords))
+    num_houses = {
+        1: "one",
+        2: "two",
+        3: "three",
+        4: "four",
+        5: "five"
+    }
+
+    def possessions(player, image, property_type: str):
+        if property_type == "homes":
+            for colors in player.properties[property_type]: # going through each color
+                for pos in player.properties[property_type][colors][0]: # positions in sublist of sublist
+                    property = games[0].spaces[pos]
+                    boardimgbackground.paste(image, (property.own_coords))
+                    if property.houses:
+                        house_number = Image.open(f"models/pieceimgs/{num_houses[property.houses]}.png")
+                        house_number = house_number.resize((house_number.width, house_number.height))
+                        boardimgbackground.paste(house_number, (property.house_coords))
         else:
-            for pos in player.properties[property]:
-                boardimgbackground.paste(image, (games[0].spaces[pos].house_coords))
+            for pos in player.properties[property_type]:
+                boardimgbackground.paste(image, (games[0].spaces[pos].own_coords))
 
     for player in allplayers:
         image = Image.open(f"models/pieceimgs/{player.character}.png")
         boardimgbackground.paste(image, (player.characterx, player.charactery))
         ownerimage = Image.open(f"models/pieceimgs/{player.character}house.png")
+        ownerimage = ownerimage.resize((ownerimage.width // 2, ownerimage.height // 2))
         if player.properties:
             possessions(player, ownerimage, "homes")
         if player.railroads:

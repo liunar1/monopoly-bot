@@ -84,7 +84,7 @@ class Player:
     
     def sell(self, player, property, position):
         property.owner = None
-        player.money += property.cost / 2
+        player.money += int(property.cost / 2)
         if type(property) == Home:
             player.properties["homes"][property.color.value][0].remove(position)
         elif type(property) == Railroad:
@@ -97,12 +97,12 @@ class Player:
     def sell_house(self, player, property):
         property.houses -= 1
         player.number_of_houses -= 1
-        player.money += property.house_cost / 2
+        player.money += int(property.house_cost / 2)
 
     def sell_hotel(self, player, property): 
         # the total number of houses on the property must be equal to 5
         property.houses -= 1
         player.number_of_hotels -= 1
-        player.money += property.house_cost / 2
+        player.money += int(property.house_cost / 2)
 
 
