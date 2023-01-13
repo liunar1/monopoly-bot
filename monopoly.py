@@ -285,4 +285,4 @@ async def bankrupt(ctx):
         return
     await ctx.send(f'It is now {games[0].players[games[0].current_player].name}\'s turn')
 
-bot.run('ODE4MjE2NTI2ODYzMjY5OTA4.Ga9Dd-.qEIbtbUPec4vrLgbZ7sfkBo_0jUuqDh2a5uUZg')
+bot.run('bot token')
